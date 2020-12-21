@@ -18,7 +18,7 @@ static bool is_pid(char *str) {
 
     bool is_num = false;
     for (size_t i = 0; i < len; i++) {
-        is_num = (str[i] > 47) && (str[i] < 58); // is ascii digit?
+        is_num = (str[i] >= '0') && (str[i] <= '9'); // is ascii digit?
         if (!is_num) {
             break;
         }
@@ -40,33 +40,53 @@ static void do_kill(char *pid_str) {
     }
 }
 
-static void listen_for_input(char *cmd_buf, char *arg_buf) {
-    char input_buf[2 * BUF_SIZE] = {0};
-    printf("bourne> ");
-    fgets(input_buf, 2 * BUF_SIZE, stdin);
-
-    if(input_buf[strlen(input_buf) - 1] == '\n') {
-        input_buf[strlen(input_buf) - 1] = 0;
-    }
-
-    sscanf(input_buf, "%s%s", cmd_buf, arg_buf);
-}
-
 int main(void) {
 
-    printf("Jason Bourne Shell 0.1.0\n\n");
+    printf("Jason Bourne Shell 0.2.0\n\n");
 
-    char cmd_buf[BUF_SIZE] = {0};
-    char arg_buf[BUF_SIZE] = {0};
+    char cmd_buf[BUF_SIZE];
+    char arg_buf[BUF_SIZE];
+    int input_buf_size = 2 * BUF_SIZE;
+    char input_buf[input_buf_size];
 
     while(true) {
+        printf("bourne> ");
+
         memset(cmd_buf, 0, BUF_SIZE);
         memset(arg_buf, 0, BUF_SIZE);
+        memset(input_buf, 0, input_buf_size);
 
-        listen_for_input(cmd_buf, arg_buf);
+        fgets(input_buf, input_buf_size, stdin);
+
+        bool nl_found = false;
+        for (int i = 0; i < input_buf_size; i++) {
+            nl_found = input_buf[i] == '\n';
+            if (nl_found) {
+                break;
+            }
+        }
+
+        if (!nl_found) {
+            char ch;
+            while ((ch = fgetc(stdin)) != '\n' && ch != EOF) {
+                // consume extra input
+            }
+            printf("jbsh: input is too long\n");
+            continue;
+        }
+
+        if(input_buf[strlen(input_buf) - 1] == '\n') {
+            input_buf[strlen(input_buf) - 1] = 0;
+        }
+
+        sscanf(input_buf, "%s%s", cmd_buf, arg_buf);
 
         if (strcmp("kill", cmd_buf) == 0) {
             do_kill(arg_buf);
+        } else if (strcmp("history", cmd_buf) == 0) {
+            printf("I don't remember\n");
+        } else if (strcmp("clear", cmd_buf) == 0) {
+            printf("\033[2J\033[H");
         } else if (strcmp("exit", cmd_buf) == 0) {
             break;
         } else {

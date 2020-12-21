@@ -3,4 +3,6 @@
 #### Supported commands:
 
 * `kill <pid>`
+* `history`
+* `clear`
 
