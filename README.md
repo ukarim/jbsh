@@ -1,8 +1,12 @@
-### jbsh - Jason Bourne shell
+# jbsh - Jason Bourne shell
 
-#### Supported commands:
+## Supported commands:
 
 * `kill <pid>`
 * `history`
-* `clear`
 
+## Build
+
+```
+rustc jbsh.rs -o jbsh
+```
